@@ -5,7 +5,7 @@
 #include <string>
 #include "tcp.h"
 
-typedef void (*IRCHook)(class IRCConnection *, std::string);
+typedef void (*IRCHook)(class IRCConnection *, std::string &);
 
 class IRCConnection {
     std::string rsp, nick, name, pass, channel;
@@ -29,6 +29,6 @@ public:
     void set_topic(std::string msg);
 };
 
-void pong_hook(IRCConnection *irc, std::string rsp);
+void pong_hook(IRCConnection *irc, std::string &rsp);
 
 #endif

@@ -10,26 +10,39 @@
 
 using namespace std;
 
+static string msg;
 static bool quit_irc   = false;
 static bool has_esmaga = true;
 
-static void quit_hook(IRCConnection *irc, string rsp)
+static size_t find_nth_str(string str, string sub, int n)
 {
-    if (rsp.find(".quit") != string::npos) {
+    size_t pos = -1;
+
+    for (int i = 1; i <= n; i++) {
+        if ((pos = str.find(sub, pos + 1)) == string::npos)
+            return string::npos;
+    }
+
+    return pos;
+}
+
+static void quit_hook(IRCConnection *irc, string &rsp)
+{
+    if (msg == ".quit") {
         irc->send_channel("later :^)");
         quit_irc = true;
     }
 }
 
-static void notice_hook(IRCConnection *irc, string rsp)
+static void notice_hook(IRCConnection *irc, string &rsp)
 {
-    if (rsp.find(".noticeme") != string::npos)
+    if (msg == ".noticeme")
         irc->send_notice("senpai has noticed");
 }
 
-static void esmaga_hook(IRCConnection *irc, string rsp)
+static void esmaga_hook(IRCConnection *irc, string &rsp)
 {
-    if (rsp.find(".esmaga") != string::npos) {
+    if (msg == ".esmaga") {
         size_t size;
         string reply;
         vector<string> vec;
@@ -53,9 +66,9 @@ static void esmaga_hook(IRCConnection *irc, string rsp)
     }
 }
 
-static void toggle_esmaga_hook(IRCConnection *irc, string rsp)
+static void toggle_esmaga_hook(IRCConnection *irc, string &rsp)
 {
-    if (rsp.find(".toggle_esmaga") != string::npos) {
+    if (msg == ".toggle_esmaga") {
         if (has_esmaga) {
             irc->rm_hook(esmaga_hook);
             irc->send_channel("removed '.esmaga' hook");
@@ -68,10 +81,20 @@ static void toggle_esmaga_hook(IRCConnection *irc, string rsp)
     }
 }
 
-void topic_hook(IRCConnection *irc, std::string rsp)
+void topic_hook(IRCConnection *irc, string &rsp)
 {
-    if (rsp.find(".topic") != string::npos)
+    if (msg == ".topic")
         irc->set_topic("shieeett");
+}
+
+void parse_msg_hook(IRCConnection *irc, string &rsp)
+{
+    if (rsp.find("PRIVMSG") != string::npos) {
+        size_t a = find_nth_str(rsp, ":", 2) + 1UL,
+               b = rsp.find("\n") - 1UL;
+
+        msg = rsp.substr(a, b - a);
+    }
 }
 
 int main()
@@ -83,6 +106,7 @@ int main()
         esmaga_hook,
         toggle_esmaga_hook,
         topic_hook,
+        parse_msg_hook,
         nullptr
     };
 
@@ -101,6 +125,7 @@ int main()
     while (!quit_irc) {
         cout << irc.get_stream();
         irc.exec_hooks();
+        msg = "";
     }
 
     return 0;

@@ -93,7 +93,7 @@ void IRCConnection::set_topic(std::string msg)
     send_raw("TOPIC " + channel + " :" + msg);
 }
 
-void pong_hook(IRCConnection *irc, std::string rsp)
+void pong_hook(IRCConnection *irc, std::string &rsp)
 {
     if (rsp.compare(0, ping.length(), ping, 0, ping.length()) == 0)
         irc->send_raw(pong + rsp.substr(ping.length()));
