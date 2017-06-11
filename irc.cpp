@@ -88,6 +88,11 @@ void IRCConnection::send_notice(std::string msg)
     send_raw("NOTICE " + channel + " :" + msg);
 }
 
+void IRCConnection::set_topic(std::string msg)
+{
+    send_raw("TOPIC " + channel + " :" + msg);
+}
+
 void pong_hook(IRCConnection *irc, std::string rsp)
 {
     if (rsp.compare(0, ping.length(), ping, 0, ping.length()) == 0)

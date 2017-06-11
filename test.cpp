@@ -68,9 +68,24 @@ static void toggle_esmaga_hook(IRCConnection *irc, string rsp)
     }
 }
 
+void topic_hook(IRCConnection *irc, std::string rsp)
+{
+    if (rsp.find(".topic") != string::npos)
+        irc->set_topic("shieeett");
+}
+
 int main()
 {
-    IRCHook hooks[]   = {pong_hook, quit_hook, notice_hook, esmaga_hook, toggle_esmaga_hook, nullptr};
+    IRCHook hooks[] = {
+        pong_hook,
+        quit_hook,
+        notice_hook,
+        esmaga_hook,
+        toggle_esmaga_hook,
+        topic_hook,
+        nullptr
+    };
+
     IRCConnection irc = {
         server, portno, channel,
         nick, name, pass

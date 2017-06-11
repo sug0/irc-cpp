@@ -26,6 +26,7 @@ public:
     void send_raw(std::string request);
     void send_channel(std::string msg);
     void send_notice(std::string msg);
+    void set_topic(std::string msg);
 };
 
 void pong_hook(IRCConnection *irc, std::string rsp);
