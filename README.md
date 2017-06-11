@@ -4,7 +4,19 @@ Simple C++ IRC bot implementation
 
 # compile
 
+    # without ssl
     $ make
+    
+    # with ssl
+    $ make USE_SSL=t
+
+# run/kill
+
+    # run
+    $ make run
+    
+    # kill (or type '.quit' on the irc channel)
+    $ make kill
 
 # license
 
