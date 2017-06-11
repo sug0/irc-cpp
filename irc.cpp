@@ -1,4 +1,7 @@
 #include "irc.h"
+#include "utils.h"
+
+#define SLEEP  650
 
 static const std::string ping = "PING", pong = "PONG";
 
@@ -48,9 +51,13 @@ void IRCConnection::rm_hook(IRCHook hook)
 void IRCConnection::auth()
 {
     send_raw("NICK " + nick);
+    sleep_ms(SLEEP);
     send_raw("USER " + nick + " 8 * " + name);
-    if (pass != "")
+    sleep_ms(SLEEP);
+    if (pass != "") {
         send_raw("PASS " + pass);
+        sleep_ms(SLEEP);
+    }
     send_raw("JOIN " + channel);
 }
 

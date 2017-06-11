@@ -73,7 +73,7 @@ void TCPClient::send(std::string request)
 #endif
 
     if (n < 0)
-        throw std::runtime_error("error writing to socket " + sockfd);
+        throw std::runtime_error("error writing to socket");
 }
 
 std::string TCPClient::receive()
@@ -86,7 +86,7 @@ std::string TCPClient::receive()
 #endif
 
     if (n < 0)
-        throw std::runtime_error("error reading from socket " + sockfd);
+        throw std::runtime_error("error reading from socket");
 
     return std::string {buf, sizeof(buf)};
 }

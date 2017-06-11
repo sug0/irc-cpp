@@ -5,7 +5,7 @@
 #include "irc.h"
 
 // uncomment line below to include your own config "config.h"
-// #define _IRC_CONFIG_H_
+//#define _IRC_CONFIG_H_
 #include "config.def.h"
 
 using namespace std;
