@@ -3,3 +3,10 @@ all:
 
 clean:
 	rm -f test
+	rm -f nohup*
+
+run:
+	nohup ./test &
+
+kill:
+	killall test
