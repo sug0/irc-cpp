@@ -21,7 +21,7 @@ Simple C++ IRC bot implementation
 # protips
 
 `tcp.cpp` is a standalone tcp client you can use for pretty much
-anything you want; it even comes with niftly ssl support!
+anything you want; it even comes with nifty ssl support!
 
 # license
 
