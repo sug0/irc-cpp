@@ -14,6 +14,7 @@ IRCConnection::IRCConnection(std::string server, uint16_t portno, std::string ch
 
 IRCConnection::~IRCConnection()
 {
+    log_off();
     delete hook_list;
     delete cli;
 }

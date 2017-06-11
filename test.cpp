@@ -13,7 +13,6 @@ static void quit_hook(IRCConnection *irc, string rsp)
 {
     if (rsp.find(".quit") != string::npos) {
         irc->send_channel("later :^)");
-        irc->log_off();
         quit_irc = true;
     }
 }
