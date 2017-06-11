@@ -4,6 +4,10 @@
 #include <cstdlib>
 #include "irc.h"
 
+// uncomment this to include your own config "config.h"
+#define _IRC_CONFIG_H_
+#include "config.def.h"
+
 using namespace std;
 
 static bool quit_irc   = false;
@@ -68,8 +72,8 @@ int main()
 {
     IRCHook hooks[]   = {pong_hook, quit_hook, notice_hook, esmaga_hook, toggle_esmaga_hook, nullptr};
     IRCConnection irc = {
-        "irc.freenode.net", 6666, "##shit-sugo",
-        "sugobot", "sugo", ""
+        server, portno, channel,
+        nick, name, pass
     };
 
     struct timespec ts;

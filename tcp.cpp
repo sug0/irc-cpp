@@ -27,11 +27,35 @@ TCPClient::TCPClient(std::string addr, uint16_t portno)
 
     if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
         throw std::runtime_error("error connecting to host " + addr);
+
+#ifdef _USE_SSL_
+    OpenSSL_add_ssl_algorithms();
+    meth = TLSv1_2_client_method();
+    ctx  = SSL_CTX_new(meth);
+
+    if (ctx == nullptr)
+        throw std::runtime_error("error negotiating ssl");
+
+    ssl = SSL_new(ctx);
+
+    if (ssl == nullptr)
+        throw std::runtime_error("error creating ssl");
+
+    SSL_set_fd(ssl, sockfd);
+
+    if (SSL_connect(ssl) < 0)
+        throw std::runtime_error("error connecting ssl");
+#endif
 }
 
 TCPClient::~TCPClient()
 {
     TCPClient::close_connection();
+#ifdef _USE_SSL_
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+#endif
 }
 
 void TCPClient::close_connection()
@@ -42,18 +66,26 @@ void TCPClient::close_connection()
 void TCPClient::send(std::string request)
 {
     bzero(buf, sizeof(buf));
-    int n = write(sockfd, request.c_str(), request.length());
+#ifdef _USE_SSL_
+    n = SSL_write(ssl, request.c_str(), request.length());
+#else
+    n = write(sockfd, request.c_str(), request.length());
+#endif
 
-    if (n < 0) 
+    if (n < 0)
         throw std::runtime_error("error writing to socket " + sockfd);
 }
 
 std::string TCPClient::receive()
 {
     bzero(buf, sizeof(buf));
-    int n = read(sockfd, buf, sizeof(buf));
+#ifdef _USE_SSL_
+    n = SSL_read(ssl, buf, sizeof(buf));
+#else
+    n = read(sockfd, buf, sizeof(buf));
+#endif
 
-    if (n < 0) 
+    if (n < 0)
         throw std::runtime_error("error reading from socket " + sockfd);
 
     return std::string {buf, sizeof(buf)};
