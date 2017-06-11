@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include "irc.h"
 
-// uncomment this to include your own config "config.h"
-#define _IRC_CONFIG_H_
+// uncomment line below to include your own config "config.h"
+// #define _IRC_CONFIG_H_
 #include "config.def.h"
 
 using namespace std;
