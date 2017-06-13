@@ -12,11 +12,20 @@ Simple C++ IRC bot implementation
 
 # run/kill
 
-    # run
+    # run (will send the bot's output to 'bot.out')
     $ make run
     
     # kill (or type '.quit' on the irc channel)
     $ make kill
+
+# usage
+
+The test bot that comes with the source, `test.cpp`, has the
+follow commands:
+
+    .quit      --  kill the bot :-(
+    .noticeme  --  the bot will notice you
+    .esmaga    --  the bot will curse at you in portuguese :-)
 
 # protips
 
