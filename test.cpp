@@ -17,9 +17,7 @@ static bool bot_quit = false;
 static void parse_request_hook(IRCConnection *irc, string &rsp)
 {
     if (rsp.at(0) == ':') {
-        int a  = 1,
-            b  = rsp.find("\n") - 1,
-            p1 = 0,
+        int p1 = 0,
             p2 = -1;
 
         rsp = rsp.substr(a, b - a);
@@ -88,10 +86,10 @@ int main()
 
     irc.add_hooks(hooks);
 
-    string quote;
     ifstream file {"strong.txt"};
 
     if (file.is_open()) {
+        string quote;
         struct timespec ts;
         timespec_get(&ts, TIME_UTC);
         srand(ts.tv_nsec);
