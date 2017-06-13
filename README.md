@@ -21,7 +21,7 @@ Simple C++ IRC bot implementation
 # usage
 
 The test bot that comes with the source, `test.cpp`, has the
-follow commands:
+following commands:
 
     .quit      --  kill the bot :-(
     .noticeme  --  the bot will notice you
