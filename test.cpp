@@ -128,11 +128,22 @@ int main(const int argc, const char *argv[])
     irc.auth();
 
     while (!bot_quit) {
-        if (use_fifo) {
-            string in = irc.get_stream();
-            write(fd, in.c_str(), in.length());
-        } else {
-            cout << irc.get_stream();
+        try {
+            if (use_fifo) {
+                string in = irc.get_stream();
+                write(fd, in.c_str(), in.length());
+            } else {
+                cout << irc.get_stream();
+            }
+        } catch (const runtime_error &e) {
+            string err = "couldn't communicate with server";
+
+            if (use_fifo)
+                write(fd, err.c_str(), err.length());
+            else
+                cerr << err << endl;
+
+            break;
         }
 
         irc.exec_hooks();
