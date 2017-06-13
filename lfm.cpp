@@ -30,7 +30,7 @@ std::string lfm_get_np(std::string lfm_user)
 {
     std::string http_resp = http_parse_body(get_recent_tracks(lfm_user));
 
-	pugi::xml_document doc;
+    pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_buffer(http_resp.c_str(), http_resp.length());
 
     if (!result)
