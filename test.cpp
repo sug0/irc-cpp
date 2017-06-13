@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdlib>
 #include "irc.h"
+#include "utils.h"
 
 // uncomment line below to include your own config "config.h"
 //#define _IRC_CONFIG_H_
@@ -10,103 +11,73 @@
 
 using namespace std;
 
-static string msg;
-static bool quit_irc   = false;
-static bool has_esmaga = true;
+static vector<string> toks, esmaga_quotes;
+static bool bot_quit = false;
 
-static size_t find_nth_str(string str, string sub, int n)
+static void parse_request_hook(IRCConnection *irc, string &rsp)
 {
-    size_t pos = -1;
+    if (rsp.at(0) == ':') {
+        int a  = 1,
+            b  = rsp.find("\n") - 1,
+            p1 = 0,
+            p2 = -1;
 
-    for (int i = 1; i <= n; i++) {
-        if ((pos = str.find(sub, pos + 1)) == string::npos)
-            return string::npos;
+        rsp = rsp.substr(a, b - a);
+
+        while ((p2 = rsp.find(" ", p2 + 1)) != string::npos) {
+            toks.push_back(rsp.substr(p1, p2 - p1));
+            p1 = p2 + 1;
+        }
+
+        toks.push_back(rsp.substr(p1));
+
+        if (toks.size() >= 4)
+            toks[3] = toks[3].substr(1);
     }
-
-    return pos;
 }
 
 static void quit_hook(IRCConnection *irc, string &rsp)
 {
-    if (msg == ".quit") {
-        irc->send_channel("later :^)");
-        quit_irc = true;
+    if (toks[1] == "PRIVMSG" && toks[3] == ".quit") {
+        if (toks[0] == admin_host || admin_host == "") {
+            irc->send_channel("later bois :-)");
+            bot_quit = true;
+        } else {
+            send_by_context(irc, "fuck off", nick, toks);
+        }
     }
+}
+
+static void core_hooks(IRCConnection *irc, string &rsp)
+{
+    pong_hook(irc, rsp);
+    parse_request_hook(irc, rsp);
+    quit_hook(irc, rsp);
 }
 
 static void notice_hook(IRCConnection *irc, string &rsp)
 {
-    if (msg == ".noticeme")
-        irc->send_notice("senpai has noticed");
+    if (toks[1] == "PRIVMSG" && toks[3] == ".noticeme")
+        send_by_context(irc, "senpai has noticed", nick, toks);
 }
 
 static void esmaga_hook(IRCConnection *irc, string &rsp)
 {
-    if (msg == ".esmaga") {
-        size_t size;
+    if (toks[1] == "PRIVMSG" && toks[3] == ".esmaga") {
         string reply;
-        vector<string> vec;
-        ifstream file {"strong.txt"};
 
-        if (file.is_open()) {
-            while (getline(file, reply))
-                vec.push_back(reply);
+        for (int i = 1; i <= 5; i++)
+            reply += esmaga_quotes[rand() % esmaga_quotes.size()] + " ";
 
-            size  = vec.size();
-            reply = "";
-
-            for (int i = 1; i <= 5; i++)
-                reply += vec[rand() % size] + " ";
-
-            file.close();
-            irc->send_channel(reply);
-        } else {
-            cerr << "couldn't open file 'strong.txt'" << endl;
-        }
-    }
-}
-
-static void toggle_esmaga_hook(IRCConnection *irc, string &rsp)
-{
-    if (msg == ".toggle_esmaga") {
-        if (has_esmaga) {
-            irc->rm_hook(esmaga_hook);
-            irc->send_channel("removed '.esmaga' hook");
-            has_esmaga = false;
-        } else {
-            irc->add_hook(esmaga_hook);
-            irc->send_channel("added '.esmaga' hook");
-            has_esmaga = true;
-        }
-    }
-}
-
-void topic_hook(IRCConnection *irc, string &rsp)
-{
-    if (msg == ".topic")
-        irc->set_topic("shieeett");
-}
-
-void parse_msg_hook(IRCConnection *irc, string &rsp)
-{
-    if (rsp.find("PRIVMSG") != string::npos) {
-        size_t a = find_nth_str(rsp, ":", 2) + 1UL,
-               b = rsp.find("\n") - 1UL;
-
-        msg = rsp.substr(a, b - a);
+        send_by_context(irc, reply, nick, toks);
     }
 }
 
 int main()
 {
     IRCHook hooks[] = {
-        pong_hook,
-        quit_hook,
+        core_hooks,
         notice_hook,
-        esmaga_hook,
-        toggle_esmaga_hook,
-        topic_hook,
-        parse_msg_hook,
         nullptr
     };
 
@@ -115,18 +86,31 @@ int main()
         nick, name, pass
     };
 
-    struct timespec ts;
-    timespec_get(&ts, TIME_UTC);
-    srand(ts.tv_nsec);
-
     irc.add_hooks(hooks);
-    irc.auth();
 
-    while (!quit_irc) {
-        cout << irc.get_stream();
-        irc.exec_hooks();
-        msg = "";
+    string quote;
+    ifstream file {"strong.txt"};
+
+    if (file.is_open()) {
+        struct timespec ts;
+        timespec_get(&ts, TIME_UTC);
+        srand(ts.tv_nsec);
+
+        while (getline(file, quote))
+            esmaga_quotes.push_back(quote);
+
+        file.close();
+        irc.add_hook(esmaga_hook);
+    } else {
+        cerr << "couldn't open file 'strong.txt'" << endl;
     }
 
-    return 0;
+    irc.auth();
+
+    while (!bot_quit) {
+        cout << irc.get_stream();
+        irc.exec_hooks();
+
+        toks.clear();
+    }
 }

@@ -29,7 +29,8 @@ TCPClient::TCPClient(std::string addr, uint16_t portno)
         throw std::runtime_error("error connecting to host " + addr);
 
 #ifdef _USE_SSL_
-    OpenSSL_add_ssl_algorithms();
+    SSL_library_init();
+
     meth = TLSv1_2_client_method();
     ctx  = SSL_CTX_new(meth);
 
@@ -42,6 +43,7 @@ TCPClient::TCPClient(std::string addr, uint16_t portno)
         throw std::runtime_error("error creating ssl");
 
     SSL_set_fd(ssl, sockfd);
+    SSL_set_connect_state(ssl);
 
     if (SSL_connect(ssl) < 0)
         throw std::runtime_error("error connecting ssl");

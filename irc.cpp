@@ -34,13 +34,13 @@ void IRCConnection::log_off(std::string msg)
 
 void IRCConnection::add_hook(IRCHook hook)
 {
-    hook_list->push_front(hook);
+    hook_list->push_back(hook);
 }
 
 void IRCConnection::add_hooks(IRCHook *hooks)
 {
     for (int i = 0; hooks[i] != nullptr; i++)
-        hook_list->push_front(hooks[i]);
+        hook_list->push_back(hooks[i]);
 }
 
 void IRCConnection::rm_hook(IRCHook hook)
@@ -78,9 +78,14 @@ void IRCConnection::send_raw(std::string request)
     cli->send(request + "\n");
 }
 
+void IRCConnection::send_privmsg(std::string target, std::string msg)
+{
+    send_raw("PRIVMSG " + target + " :" + msg);
+}
+
 void IRCConnection::send_channel(std::string msg)
 {
-    send_raw("PRIVMSG " + channel + " :" + msg);
+    send_privmsg(channel, msg);
 }
 
 void IRCConnection::send_notice(std::string msg)
