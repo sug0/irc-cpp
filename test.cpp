@@ -2,6 +2,10 @@
 #include <fstream>
 #include <vector>
 #include <cstdlib>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "irc.h"
 #include "utils.h"
 
@@ -73,8 +77,24 @@ static void esmaga_hook(IRCConnection *irc, string &rsp)
     }
 }
 
-int main()
+int main(const int argc, const char *argv[])
 {
+    int fd;
+    bool use_fifo = false;
+    string fifo   = "/tmp/irc_fifo";
+
+    if (argc >= 2) {
+        if (strcmp(argv[1], "-p") == 0) {
+            use_fifo = true;
+
+            if (mkfifo(fifo.c_str(), 0600) < 0)
+                throw std::runtime_error("error creating named pipe");
+
+            if ((fd = open(fifo.c_str(), O_WRONLY)) < 0)
+                throw std::runtime_error("error opening named pipe");
+        }
+    }
+
     IRCHook hooks[] = {
         core_hooks,
         notice_hook,
@@ -108,9 +128,22 @@ int main()
     irc.auth();
 
     while (!bot_quit) {
-        cout << irc.get_stream();
+        if (use_fifo) {
+            string in = irc.get_stream();
+            write(fd, in.c_str(), in.length());
+        } else {
+            cout << irc.get_stream();
+        }
+
         irc.exec_hooks();
 
         toks.clear();
     }
+
+    if (use_fifo) {
+        close(fd);
+        unlink(fifo.c_str());
+    }
+
+    return 0;
 }

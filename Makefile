@@ -3,10 +3,14 @@ all:
 
 clean:
 	rm -f test
-	rm -f nohup*
+	rm -f bot.out
 
 run:
-	nohup ./test &
+	rm -f bot.out
+	rm -f /tmp/irc_fifo
+	./test -p &
+	sleep 1
+	./pipe_handler.sh &
 
 kill:
 	killall test

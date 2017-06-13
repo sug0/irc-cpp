@@ -90,7 +90,7 @@ std::string TCPClient::receive()
     if (n < 0)
         throw std::runtime_error("error reading from socket");
 
-    return std::string {buf, sizeof(buf)};
+    return std::string {buf, strlen(buf)};
 }
 
 std::string TCPClient::get(std::string request)
