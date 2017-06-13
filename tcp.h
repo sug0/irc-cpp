@@ -12,15 +12,11 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 
-#ifdef _USE_SSL_
-
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-
-#endif
 
 class TCPClient {
     std::string addr;
@@ -28,14 +24,14 @@ class TCPClient {
     int sockfd, portno, n;
     struct hostent *server;
     struct sockaddr_in serv_addr;
-#ifdef _USE_SSL_
+
+    bool use_ssl;
     SSL_CTX *ctx;
     SSL *ssl;
     const SSL_METHOD *meth;
-#endif
 
 public:
-    TCPClient(std::string addr, uint16_t portno);
+    TCPClient(bool use_ssl, std::string addr, uint16_t portno);
     ~TCPClient();
     void close_connection();
     void send(std::string request);

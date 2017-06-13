@@ -13,7 +13,7 @@ class IRCConnection {
     TCPClient *cli;
 
 public:
-    IRCConnection(std::string server, uint16_t portno, std::string channel, std::string nick, std::string name, std::string pass);
+    IRCConnection(bool use_ssl, std::string server, uint16_t portno, std::string channel, std::string nick, std::string name, std::string pass);
     ~IRCConnection();
     void log_off();
     void log_off(std::string msg);

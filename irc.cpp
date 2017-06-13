@@ -5,10 +5,10 @@
 
 static const std::string ping = "PING", pong = "PONG";
 
-IRCConnection::IRCConnection(std::string server, uint16_t portno, std::string channel, std::string nick, std::string name, std::string pass)
+IRCConnection::IRCConnection(bool use_ssl, std::string server, uint16_t portno, std::string channel, std::string nick, std::string name, std::string pass)
 {
     this->hook_list = new std::list<IRCHook>();
-    this->cli       = new TCPClient(server, portno);
+    this->cli       = new TCPClient(use_ssl, server, portno);
     this->nick      = nick;
     this->name      = name;
     this->pass      = pass;
@@ -29,7 +29,7 @@ void IRCConnection::log_off()
 
 void IRCConnection::log_off(std::string msg)
 {
-    send_raw("QUIT :" + msg);
+    send_raw("QUIT " + msg);
 }
 
 void IRCConnection::add_hook(IRCHook hook)
@@ -69,7 +69,7 @@ std::string IRCConnection::get_stream()
 
 void IRCConnection::exec_hooks()
 {
-    for (std::list<IRCHook>::iterator h = hook_list->begin(); h != hook_list->end(); h++)
+    for (auto h = hook_list->begin(); h != hook_list->end(); h++)
         (*h)(this, rsp);
 }
 

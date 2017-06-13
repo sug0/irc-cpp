@@ -8,9 +8,8 @@
 #include <unistd.h>
 #include "irc.h"
 #include "utils.h"
+#include "lfm.h"
 
-// uncomment line below to include your own config "config.h"
-//#define _IRC_CONFIG_H_
 #include "config.def.h"
 
 using namespace std;
@@ -77,6 +76,16 @@ static void esmaga_hook(IRCConnection *irc, string &rsp)
     }
 }
 
+static void lfm_hook(IRCConnection *irc, string &rsp)
+{
+    if (toks[1] == "PRIVMSG" && toks[3] == ".np") {
+        if (toks.size() < 5)
+            send_by_context(irc, "usage: .np <lfm_user>", nick, toks);
+        else
+            send_by_context(irc, lfm_get_np(toks[4]), nick, toks);
+    }
+}
+
 int main(const int argc, const char *argv[])
 {
     int fd;
@@ -98,10 +107,12 @@ int main(const int argc, const char *argv[])
     IRCHook hooks[] = {
         core_hooks,
         notice_hook,
+        lfm_hook,
         nullptr
     };
 
     IRCConnection irc = {
+        USE_SSL,
         server, portno, channel,
         nick, name, pass
     };

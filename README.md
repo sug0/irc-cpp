@@ -2,6 +2,11 @@
 
 Simple C++ IRC bot implementation
 
+# dependencies
+
+For now, this project depends on [openssl](https://www.openssl.org/) and optionally
+[pugixml](https://github.com/zeux/pugixml), if you want to build `test.cpp`.
+
 # compile
 
     # without ssl
@@ -9,6 +14,9 @@ Simple C++ IRC bot implementation
     
     # with ssl
     $ make USE_SSL=t
+
+    # to include your own config in `config.h`
+    $ make IRC_CONFIG=t
 
 # run/kill
 
