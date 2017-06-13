@@ -31,9 +31,10 @@ For now, this project depends on [openssl](https://www.openssl.org/) and optiona
 The test bot that comes with the source, `test.cpp`, has the
 following commands:
 
-    .quit      --  kill the bot :-(
-    .noticeme  --  the bot will notice you
-    .esmaga    --  the bot will curse at you in portuguese :-)
+    .quit       --  kill the bot :-(
+    .noticeme   --  the bot will notice you
+    .esmaga     --  the bot will curse at you in portuguese :-)
+    .np <user>  --  the bot will tell you what you're listening to
 
 # protips
 
