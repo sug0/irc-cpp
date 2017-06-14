@@ -1,3 +1,4 @@
+LDLIBS=-lcrypt -lssl -lpugixml -lsqlite3
 IRC_CONFIG=f
 USE_SSL=f
 CONF=
@@ -8,9 +9,9 @@ endif
 
 all:
 ifeq ($(USE_SSL), t)
-	c++ -std=c++11 -o test test.cpp lfm.cpp utils.cpp tcp.cpp irc.cpp $(CONF) -D_USE_SSL_ -lcrypt -lssl -lpugixml
+	c++ -std=c++11 -o test test.cpp sql.cpp lfm.cpp utils.cpp tcp.cpp irc.cpp $(CONF) -D_USE_SSL_ $(LDLIBS)
 else
-	c++ -std=c++11 -o test test.cpp lfm.cpp utils.cpp tcp.cpp irc.cpp $(CONF) -lcrypt -lssl -lpugixml
+	c++ -std=c++11 -o test test.cpp sql.cpp lfm.cpp utils.cpp tcp.cpp irc.cpp $(CONF) $(LDLIBS)
 endif
 
 clean:

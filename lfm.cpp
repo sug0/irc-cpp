@@ -1,5 +1,7 @@
 #include "lfm.h"
 
+bool __lfm_error = false;
+
 std::string get_recent_tracks(std::string user)
 {
     char req[lfm_req.length() + user.length() + lfm_key.length() + 1];
@@ -38,8 +40,12 @@ std::string lfm_get_np(std::string lfm_user)
 
     pugi::xml_node track = doc.child("lfm").child("recenttracks").child("track");
 
-    if (!track)
+    if (!track) {
+        __lfm_error = true;
         return "user '" + lfm_user + "' isn't available";
+    }
+
+    __lfm_error = false;
 
     return lfm_user + " " + play_status(track.child("date"))
          + " '" + track.child_value("artist") + " - " + track.child_value("name") + "' "

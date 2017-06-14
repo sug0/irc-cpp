@@ -9,13 +9,26 @@
 #include "irc.h"
 #include "utils.h"
 #include "lfm.h"
+#include "sql.h"
 
 #include "config.def.h"
 
 using namespace std;
 
+extern bool __lfm_error;
+
+static SQLiteDB *sqlite_db;
+static string db_lfm_user;
 static vector<string> toks, esmaga_quotes;
 static bool bot_quit = false;
+
+static int lfm_db_user_get_callback(void *param, int argc, char **argv, char **colname)
+{
+    if (argc != 0)
+        db_lfm_user = {argv[0]};
+
+    return 0;
+}
 
 static void parse_request_hook(IRCConnection *irc, string &rsp)
 {
@@ -79,10 +92,30 @@ static void esmaga_hook(IRCConnection *irc, string &rsp)
 static void lfm_hook(IRCConnection *irc, string &rsp)
 {
     if (toks[1] == "PRIVMSG" && toks[3] == ".np") {
-        if (toks.size() < 5)
-            send_by_context(irc, "usage: .np <lfm_user>", nick, toks);
-        else
+        if (toks.size() < 5) {
+            sqlite_db->exec("SELECT lfm_username FROM"
+                            "  (SELECT * FROM irc_users WHERE irc_nick='" + get_sender_nick(toks[0]) + "');",
+                            lfm_db_user_get_callback, nullptr);
+
+            if (db_lfm_user != "") {
+                send_by_context(irc, lfm_get_np(db_lfm_user), nick, toks);
+                db_lfm_user = "";
+            } else {
+                send_by_context(irc, "usage: .np <lfm_user>", nick, toks);
+            }
+        } else {
             send_by_context(irc, lfm_get_np(toks[4]), nick, toks);
+
+            if (!__lfm_error) {
+                sqlite_db->exec("UPDATE irc_users SET lfm_username='" + toks[4] + "'"
+                                "  WHERE irc_nick='" + get_sender_nick(toks[0]) + "';"
+                                ""
+                                "INSERT INTO irc_users"
+                                "  SELECT '" + get_sender_nick(toks[0]) + "', '" + toks[4] + "'"
+                                "    WHERE (SELECT Changes()=0);",
+                                nullptr, nullptr);
+            }
+        }
     }
 }
 
@@ -118,6 +151,13 @@ int main(const int argc, const char *argv[])
     };
 
     irc.add_hooks(hooks);
+
+    SQLiteDB db {"lfm_users.db"};
+    sqlite_db = &db;
+
+    sqlite_db->exec("CREATE TABLE IF NOT EXISTS"
+                    "  irc_users(irc_nick TEXT, lfm_username TEXT);",
+                    nullptr, nullptr);
 
     ifstream file {"strong.txt"};
 

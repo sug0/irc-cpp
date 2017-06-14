@@ -1,3 +1,5 @@
+*.o
 test
 bot.out
 config.h
+lfm_users.db

@@ -7,6 +7,8 @@
 #include "tcp.h"
 #include "config.def.h"
 
+extern bool __lfm_error;
+
 static const std::string lfm_url = "ws.audioscrobbler.com";
 static const std::string lfm_req = "/2.0/?method=user.getrecenttracks&user=%s&api_key=%s";
 
