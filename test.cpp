@@ -1,11 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <exception>
 #include <cstdlib>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <syslog.h>
 #include "irc.h"
 #include "utils.h"
 #include "lfm.h"
@@ -74,7 +76,7 @@ static void core_hooks(IRCConnection *irc, string &rsp)
 static void notice_hook(IRCConnection *irc, string &rsp)
 {
     if (toks[1] == "PRIVMSG" && toks[3] == ".noticeme")
-        send_by_context(irc, "senpai has noticed", nick, toks);
+        send_by_context(irc, "senpai has noticed " IRC_BOLD_FMT(IRC_COLOR_FMT("<3", IRC_RED)), nick, toks);
 }
 
 static void esmaga_hook(IRCConnection *irc, string &rsp)
@@ -123,6 +125,7 @@ int main(const int argc, const char *argv[])
 {
     int fd;
     bool use_fifo = false;
+    bool use_slog = false;
     string fifo   = "/tmp/irc_fifo";
 
     if (argc >= 2) {
@@ -134,6 +137,11 @@ int main(const int argc, const char *argv[])
 
             if ((fd = open(fifo.c_str(), O_WRONLY)) < 0)
                 throw std::runtime_error("error opening named pipe");
+        }
+
+        if (strcmp(argv[1], "-l") == 0) {
+            use_slog = true;
+            openlog(NULL, LOG_PID, LOG_USER);
         }
     }
 
@@ -180,19 +188,37 @@ int main(const int argc, const char *argv[])
 
     while (!bot_quit) {
         try {
-            if (use_fifo) {
-                string in = irc.get_stream();
-                write(fd, in.c_str(), in.length());
-            } else {
-                cout << irc.get_stream();
-            }
-        } catch (const runtime_error &e) {
-            string err = "couldn't communicate with server";
+            string in = irc.get_stream();
 
-            if (use_fifo)
-                write(fd, err.c_str(), err.length());
-            else
-                cerr << err << endl;
+            if (use_fifo) {
+                write(fd, in.c_str(), in.length());
+            } else if (use_slog) {
+                syslog(LOG_INFO, in.c_str());
+            } else {
+                cout << in;
+            }
+        } catch (const TCPClientException &e) {
+            string ex {e.what()};
+
+            if (use_fifo) {
+                write(fd, ex.c_str(), ex.length());
+            } else if (use_slog) {
+                syslog(LOG_INFO, ex.c_str());
+            } else {
+                cerr << ex;
+            }
+
+            break;
+        } catch (...) {
+            string ex = "unknown exception";
+
+            if (use_fifo) {
+                write(fd, ex.c_str(), ex.length());
+            } else if (use_slog) {
+                syslog(LOG_INFO, ex.c_str());
+            } else {
+                cerr << ex;
+            }
 
             break;
         }
@@ -206,6 +232,9 @@ int main(const int argc, const char *argv[])
         close(fd);
         unlink(fifo.c_str());
     }
+
+    if (use_slog)
+        closelog();
 
     return 0;
 }
