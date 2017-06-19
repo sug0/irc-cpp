@@ -5,6 +5,38 @@
 #include <string>
 #include "tcp.h"
 
+#define IRC_WHITE        "0"
+#define IRC_BLACK        "1"
+#define IRC_BLUE_NAVY    "2"
+#define IRC_GREEN        "3"
+#define IRC_RED          "4"
+#define IRC_BROWN        "5"
+#define IRC_PURPLE       "6"
+#define IRC_ORANGE       "7"
+#define IRC_YELLOW       "8"
+#define IRC_LIGHT_GREEN  "9"
+#define IRC_TEAL         "10"
+#define IRC_LIGHT_CYAN   "11"
+#define IRC_LIGHT_BLUE   "12"
+#define IRC_PINK         "13"
+#define IRC_GRAY         "14"
+#define IRC_LIGHT_GRAY   "15"
+
+#define IRC_BOLD         "\x02"
+#define IRC_COLORED      "\x03"
+#define IRC_ITALIC       "\x1D"
+#define IRC_UNDERLINED   "\x1F"
+#define IRC_VIDEO        "\x16"
+#define IRC_RESET        "\x0F"
+
+#define IRC_COLOR_FMT(STR, FG)         IRC_COLORED FG        STR IRC_COLORED
+#define IRC_COLOR_FMT_BG(STR, FG, BG)  IRC_COLORED FG "," BG STR IRC_COLORED
+
+#define IRC_BOLD_FMT(STR)        IRC_BOLD       STR IRC_RESET
+#define IRC_ITALIC_FMT(STR)      IRC_ITALIC     STR IRC_RESET
+#define IRC_UNDERLINED_FMT(STR)  IRC_UNDERLINED STR IRC_RESET
+#define IRC_VIDEO_FMT(STR)       IRC_VIDEO      STR IRC_RESET
+
 typedef void (*IRCHook)(class IRCConnection *, std::string &);
 
 class IRCConnection {
