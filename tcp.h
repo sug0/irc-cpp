@@ -2,6 +2,7 @@
 #define _TCP_CONN_H_
 
 #include <stdexcept>
+#include <exception>
 #include <string>
 #include <cstdlib>
 #include <cstring>
@@ -11,6 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
+#include <signal.h>
 
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
@@ -37,6 +39,15 @@ public:
     void send(std::string request);
     std::string receive();
     std::string get(std::string request);
+};
+
+class TCPClientException : public std::exception {
+    char except[1024];
+
+public:
+    TCPClientException(const char *msg);
+    TCPClientException(const std::string &msg);
+    const char *what() const throw();
 };
 
 #endif
