@@ -10,12 +10,7 @@ std::string get_recent_tracks(std::string user)
     std::string response, r;
     TCPClient lfm {false, std::string {lfm_url}, 80};
 
-    lfm.send("GET " + std::string {req} + " HTTP/1.0\n\n");
-
-    while ((r = lfm.receive()) != "")
-        response += r;
-
-    return response;
+    return lfm.get("GET " + std::string {req} + " HTTP/1.0\n\n");
 }
 
 std::string http_parse_body(std::string raw_http)
@@ -48,6 +43,6 @@ std::string lfm_get_np(std::string lfm_user)
     __lfm_error = false;
 
     return lfm_user + " " + play_status(track.child("date"))
-         + " '" + track.child_value("artist") + " - " + track.child_value("name") + "' "
-         + "from the album '" + track.child_value("album") + "'";
+         + " «" + track.child_value("artist") + " - " + track.child_value("name") + "» "
+         + "from the album «" + track.child_value("album") + "»";
 }
