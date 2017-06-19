@@ -1,4 +1,4 @@
-LDLIBS=-lcrypt -lssl -lpugixml -lsqlite3
+LDLIBS=-lcrypto -lssl -lpugixml -lsqlite3
 IRC_CONFIG=f
 USE_SSL=f
 CONF=

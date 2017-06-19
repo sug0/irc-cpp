@@ -63,6 +63,8 @@ TCPClient::~TCPClient()
         SSL_shutdown(ssl);
         SSL_free(ssl);
         SSL_CTX_free(ctx);
+        EVP_cleanup();
+        CRYPTO_cleanup_all_ex_data();
     }
 }
 
