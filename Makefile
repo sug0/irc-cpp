@@ -9,21 +9,27 @@ endif
 
 all:
 ifeq ($(USE_SSL), t)
-	c++ -std=c++11 -o test test.cpp sql.cpp lfm.cpp utils.cpp tcp.cpp irc.cpp $(CONF) -D_USE_SSL_ $(LDLIBS)
+	c++ -std=c++11 -o sugobot test.cpp sql.cpp lfm.cpp utils.cpp tcp.cpp irc.cpp $(CONF) -D_USE_SSL_ $(LDLIBS)
 else
-	c++ -std=c++11 -o test test.cpp sql.cpp lfm.cpp utils.cpp tcp.cpp irc.cpp $(CONF) $(LDLIBS)
+	c++ -std=c++11 -o sugobot test.cpp sql.cpp lfm.cpp utils.cpp tcp.cpp irc.cpp $(CONF) $(LDLIBS)
 endif
 
 clean:
-	rm -f test
+	rm -f sugobot
 	rm -f bot.out
+	rm -f bot.err
 
-run:
+run_pipe:
 	rm -f bot.out
+	rm -f bot.err
 	rm -f /tmp/irc_fifo
-	./test -p &
+	./sugobot -p &
 	sleep 1
 	./pipe_handler.sh &
 
+run_syslog:
+	rm -f bot.err
+	./sugobot -l &
+
 kill:
-	killall test
+	killall sugobot

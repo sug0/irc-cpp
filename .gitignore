@@ -1,5 +1,6 @@
 *.o
 test
 bot.out
+sugobot
 config.h
 lfm_users.db
