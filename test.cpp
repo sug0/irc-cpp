@@ -197,6 +197,9 @@ int main(const int argc, const char *argv[])
             } else {
                 cout << in;
             }
+
+            irc.exec_hooks();
+            toks.clear();
         } catch (const TCPClientException &e) {
             string ex {e.what()};
 
@@ -222,10 +225,6 @@ int main(const int argc, const char *argv[])
 
             break;
         }
-
-        irc.exec_hooks();
-
-        toks.clear();
     }
 
     if (use_fifo) {
