@@ -24,11 +24,13 @@ if you want to build `test.cpp`.
     # run with pipe (will send the bot's output to 'bot.out')
     $ make run_pipe
 
-    # run with system log (sends output to /var/log/syslog,
+    # run with system log (sends output to '/var/log/syslog',
     # or anywhere else you might have configured in rsyslog)
     $ make run_syslog
     
-    # kill (or type '.quit' on the irc channel)
+    # kill (or type '.quit' on the irc channel, granted you need
+    # to have your host configured in 'config.h' , to prevent this
+    # command from being abused by the average user)
     $ make kill
 
 # usage
@@ -39,7 +41,7 @@ following commands:
     .quit       --  kill the bot :-(
     .noticeme   --  the bot will notice you
     .esmaga     --  the bot will curse at you in portuguese :-)
-    .np <user>  --  the bot will tell you what you're listening to
+    .np <user>  --  the bot will tell you what you're listening to, using last.fm
 
 # protips
 
