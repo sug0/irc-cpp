@@ -21,8 +21,12 @@ if you want to build `test.cpp`.
 
 # run/kill
 
-    # run (will send the bot's output to 'bot.out')
-    $ make run
+    # run with pipe (will send the bot's output to 'bot.out')
+    $ make run_pipe
+
+    # run with system log (sends output to /var/log/syslog,
+    # or anywhere else you might have configured in rsyslog)
+    $ make run_syslog
     
     # kill (or type '.quit' on the irc channel)
     $ make kill
