@@ -7,7 +7,6 @@ std::string get_recent_tracks(std::string user)
     char req[lfm_req.length() + user.length() + lfm_key.length() + 1];
     sprintf(req, lfm_req.c_str(), user.c_str(), lfm_key.c_str());
 
-    std::string response, r;
     TCPClient lfm {false, lfm_url, 80};
 
     return lfm.get("GET " + std::string {req} + " HTTP/1.0\n\n");
