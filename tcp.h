@@ -24,6 +24,7 @@ class TCPClient {
     int sockfd, portno, n;
     struct hostent *server;
     struct sockaddr_in serv_addr;
+    bool is_async;
 
     bool use_ssl;
     SSL_CTX *ctx;
@@ -37,6 +38,7 @@ public:
     void send(std::string request);
     std::string receive();
     std::string get(std::string request);
+    void set_async();
 };
 
 class TCPClientException : public std::exception {

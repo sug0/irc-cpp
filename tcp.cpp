@@ -53,6 +53,9 @@ TCPClient::TCPClient(bool use_ssl, std::string addr, uint16_t portno)
 
     // ignore SIGPIPE
     signal(SIGPIPE, SIG_IGN);
+
+    // not async
+    is_async = false;
 }
 
 TCPClient::~TCPClient()
@@ -110,6 +113,13 @@ std::string TCPClient::get(std::string request)
         req += r;
 
     return req;
+}
+
+void TCPClient::set_async()
+{
+    if (!is_async) {
+        //fd_set
+    }
 }
 
 TCPClientException::TCPClientException(const char *msg)

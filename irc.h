@@ -56,6 +56,8 @@ public:
     std::string get_stream();
     void exec_hooks();
     void send_raw(std::string request);
+    void join(std::string channel);
+    void part(std::string channel);
     void send_privmsg(std::string target, std::string msg);
     void send_channel(std::string msg);
     void send_notice(std::string msg);

@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <signal.h>
+#include <setjmp.h>
 #include "irc.h"
 #include "utils.h"
 #include "lfm.h"
@@ -19,10 +21,17 @@ using namespace std;
 
 extern bool __lfm_error;
 
+static jmp_buf quit_jmp;
 static SQLiteDB *sqlite_db;
 static string db_lfm_user;
 static vector<string> toks, esmaga_quotes;
 static bool bot_quit = false;
+
+static void catch_quit(int signo)
+{
+    bot_quit = true;
+    longjmp(quit_jmp, 1);
+}
 
 static int lfm_db_user_get_callback(void *param, int argc, char **argv, char **colname)
 {
@@ -121,6 +130,34 @@ static void lfm_hook(IRCConnection *irc, string &rsp)
     }
 }
 
+static void join_hook(IRCConnection *irc, string &rsp)
+{
+    if (toks[1] == "PRIVMSG" && toks[3] == ".join") {
+        if (toks.size() < 5) {
+            send_by_context(irc, "usage: .join <channel>", nick, toks);
+        } else {
+            if (toks[0] == admin_host || admin_host == "")
+                irc->join(toks[4]);
+            else
+                send_by_context(irc, "fuck off", nick, toks);
+        }
+    }
+}
+
+static void part_hook(IRCConnection *irc, string &rsp)
+{
+    if (toks[1] == "PRIVMSG" && toks[3] == ".part") {
+        if (toks.size() < 5) {
+            send_by_context(irc, "usage: .part <channel>", nick, toks);
+        } else {
+            if (toks[0] == admin_host || admin_host == "")
+                irc->part(toks[4]);
+            else
+                send_by_context(irc, "fuck off", nick, toks);
+        }
+    }
+}
+
 int main(const int argc, const char *argv[])
 {
     int fd;
@@ -128,15 +165,21 @@ int main(const int argc, const char *argv[])
     bool use_slog = false;
     string fifo   = "/tmp/irc_fifo";
 
+    if (signal(SIGINT, catch_quit) == SIG_ERR)
+        throw runtime_error("error installing signal handler for SIGINT");
+
+    if (signal(SIGTERM, catch_quit) == SIG_ERR)
+        throw runtime_error("error installing signal handler for SIGTERM");
+
     if (argc >= 2) {
         if (strcmp(argv[1], "-p") == 0) {
             use_fifo = true;
 
             if (mkfifo(fifo.c_str(), 0600) < 0)
-                throw std::runtime_error("error creating named pipe");
+                throw runtime_error("error creating named pipe");
 
             if ((fd = open(fifo.c_str(), O_WRONLY)) < 0)
-                throw std::runtime_error("error opening named pipe");
+                throw runtime_error("error opening named pipe");
         }
 
         if (strcmp(argv[1], "-l") == 0) {
@@ -149,6 +192,8 @@ int main(const int argc, const char *argv[])
         core_hooks,
         notice_hook,
         lfm_hook,
+        join_hook,
+        part_hook,
         nullptr
     };
 
@@ -185,6 +230,7 @@ int main(const int argc, const char *argv[])
     }
 
     irc.auth();
+    setjmp(quit_jmp);
 
     while (!bot_quit) {
         try {
@@ -200,7 +246,7 @@ int main(const int argc, const char *argv[])
 
             irc.exec_hooks();
             toks.clear();
-        } catch (const TCPClientException &e) {
+        } catch (const exception &e) {
             string ex {e.what()};
 
             if (use_fifo) {

@@ -58,7 +58,7 @@ void IRCConnection::auth()
         send_raw("PASS " + pass);
         sleep_ms(SLEEP);
     }
-    send_raw("JOIN " + channel);
+    join(channel);
 }
 
 std::string IRCConnection::get_stream()
@@ -75,7 +75,17 @@ void IRCConnection::exec_hooks()
 
 void IRCConnection::send_raw(std::string request)
 {
-    cli->send(request + "\n");
+    cli->send(request + "\r\n");
+}
+
+void IRCConnection::join(std::string channel)
+{
+    send_raw("JOIN " + channel);
+}
+
+void IRCConnection::part(std::string channel)
+{
+    send_raw("PART " + channel);
 }
 
 void IRCConnection::send_privmsg(std::string target, std::string msg)
